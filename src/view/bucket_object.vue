@@ -2,43 +2,44 @@
   <div  class="layout">
     <Layout>
       <Sider style="margin-right:15px;background:transparent;height: 100%">
-        <Card>
-          <p slot="title">对象存储</p>
-          <ul>
-            <li v-for="(item,index) in buckets" :key="index">
-              <a @click="listBucketObjs(item.name,'')">{{ item.name }}</a>
-            </li>
-          </ul>
-        </Card>
+        <InsideMenu></InsideMenu>
       </Sider>
       <Content>
         <Card>
-          <Tabs value="name1">
-            <TabPane label="文件管理" name="name1">
-              <ButtonGroup>
-                <Button type="primary" @click="modal9 = true" icon="md-cloud-upload">上传文件</Button>
-                <Button type="primary" @click="modelDir = true" icon="ios-list-box-outline">新建目录</Button>
-                <Button type="primary" icon="md-refresh" @click="refresh">刷新</Button>
-              </ButtonGroup>
-              <Dropdown style="margin-left: 20px" @on-click="batchDown">
-                <Button type="primary">
-                  批量操作
-                  <Icon type="ios-arrow-down"></Icon>
-                </Button>
-                <DropdownMenu slot="list">
-                  <DropdownItem name="down" :disabled="selectedItems.length==0">批量下载</DropdownItem>
-                  <DropdownItem name="del" :disabled="selectedItems.length==0" >批量删除</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-              <ButtonGroup>
-                <Button type="text" @click="loadMore" icon="fa fa-ls">加载更多</Button>
-              </ButtonGroup>
-              <Table id="filelist" ref="selection" :loading="loading" :columns="columns4" :data="datalist" max-height="500"
-                     style="margin-top: 10px;" @on-selection-change="select" :show-slot-bar="true">
-                <template slot="bar"><i class="fa fa-list"></i><span class="ivu-icon ivu-icon-ios-return-left back"></span><span v-for="(bread,index) in breadData" :key="index"><a v-if="bread.type=='a'" :href="bread.link" @click.prevent="listPath(bread.fullPath)">{{bread.path}}&nbsp;&nbsp;</a><span v-else>{{bread.path}}</span></span></template>
-              </Table>
-            </TabPane>
-          </Tabs>
+          <Menu ref="menu" mode="horizontal" :theme="theme" active-name="2">
+            <MenuItem name="1">
+              <Icon type="ios-paper" />
+              <router-link :to="'/bucket/' + this.$route.params.dc + '/' + this.$route.params.bucket +'/overview'">概览</router-link>
+            </MenuItem>
+            <MenuItem name="2">
+              <Icon type="ios-people" />
+              <router-link :to="'/bucket/' + this.$route.params.dc + '/' + this.$route.params.bucket +'/object'">文件管理</router-link>
+            </MenuItem>
+          </Menu>
+          <div style="margin-top:10px">
+            <ButtonGroup>
+              <Button type="primary" @click="modal9 = true" icon="md-cloud-upload">上传文件</Button>
+              <Button type="primary" @click="modelDir = true" icon="ios-list-box-outline">新建目录</Button>
+              <Button type="primary" icon="md-refresh" @click="refresh">刷新</Button>
+            </ButtonGroup>
+            <Dropdown style="margin-left: 20px" @on-click="batchDown">
+              <Button type="primary">
+                批量操作
+                <Icon type="ios-arrow-down"></Icon>
+              </Button>
+              <DropdownMenu slot="list">
+                <DropdownItem name="down" :disabled="selectedItems.length==0">批量下载</DropdownItem>
+                <DropdownItem name="del" :disabled="selectedItems.length==0" >批量删除</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+            <ButtonGroup>
+              <Button type="text" @click="loadMore" icon="fa fa-ls">加载更多</Button>
+            </ButtonGroup>
+            <Table id="filelist" ref="selection" :loading="loading" :columns="columns4" :data="datalist" max-height="500"
+                   style="margin-top: 10px;" @on-selection-change="select" :show-slot-bar="true">
+              <template slot="bar"><i class="fa fa-list"></i><span class="ivu-icon ivu-icon-ios-return-left back"></span><span v-for="(bread,index) in breadData" :key="index"><a v-if="bread.type=='a'" :href="bread.link" @click.prevent="listPath(bread.fullPath)">{{bread.path}}&nbsp;&nbsp;</a><span v-else>{{bread.path}}</span></span></template>
+            </Table>
+          </div>
           <Drawer width="30" title="文件上传" :mask-closable='false' :scrollable='true' footer-hide v-model="modal9"
                   class-name="uploadModel" id="uploadFile">
             <Upload
@@ -46,8 +47,7 @@
               :show-upload-list="false"
               :default-file-list="defaultList"
               :on-success="handleSuccess"
-              :format="['jpg','jpeg','png']"
-              :max-size="2048"
+              :max-size="1024000"
               :on-format-error="handleFormatError"
               :on-exceeded-size="handleMaxSize"
               :before-upload="handleBeforeUpload"
@@ -55,7 +55,7 @@
               type="drag"
               :data="uploadParam"
               :showUploadList="showUploadList"
-              action="http://localhost:9098/oss/ibs">
+              :action="uploadAction">
               <div style="padding: 20px 0">
                 <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
                 <p>Click or drag files here to upload</p>
@@ -97,13 +97,14 @@
 import {generateUploadData, listObjects, deleteObj, createDir, deleteDir, getBucketList} from '@/api/data'
 import store from '@/store'
 import qs from 'qs'
+import InsideMenu from './components/menu/InsideMenu'
 
 export default {
-  name: 'join_page',
+  name: 'bucket_object',
   props: {
 
   },
-  components: {},
+  components: {InsideMenu},
   data () {
     return {
       loading: true,
@@ -119,6 +120,9 @@ export default {
       nextMarker: '',
       buckets: [],
       currentBucket: '',
+      theme: 'light',
+      activeName: '2',
+      uploadAction: 'http://localhost:9098/oss/' + this.$route.params.bucket,
       columns4: [
         {
           type: 'selection',
@@ -465,15 +469,10 @@ export default {
         let d = document.getElementById('download')
         d.href = 'http://localhost:10009/download?' + qs.stringify(param, {arrayFormat: 'repeat'})
         d.click()
-        // download('ibs',this.selectedItems).then((res)=>{
-        //   let blob = new Blob([res.data],{type:'application/zip'})
-        //   let objUrl = URL.createObjectURL(blob)
-        //   window.location.href = objUrl
-        // })
       }
     },
     select (selection, row) {
-      var arr = []
+      let arr = []
       selection.forEach(function (item) {
         console.log(item)
         arr.push(item.path)
@@ -491,6 +490,7 @@ export default {
     }
   },
   mounted () {
+    this.currentBucket = this.$route.params.bucket
     this.uploadList = this.$refs.upload.fileList
     listObjects(this.currentBucket, '').then((res) => {
       this.loading = false
@@ -515,6 +515,32 @@ export default {
     }).catch(function (error) {
       console.log(error)
     })
+  },
+  watch: {
+    $route (to, from) {
+      this.$refs.menu.currentActiveName = '2'
+      this.currentBucket = this.$route.params.bucket
+      this.breadData = []
+      this.loading = true
+      listObjects(this.currentBucket, '').then((res) => {
+        this.loading = false
+        this.datalist = res.data.objectList
+        this.nextMarker = res.data.nextMarker
+        this.datalist.forEach(function (e, i, a) {
+          if (e.dir) {
+            e._disabled = true
+          }
+        })
+        let obj = {}
+        obj.size = 0
+        obj.path = '/'
+        obj.type = 'span'
+        this.breadData.push(obj)
+      }).catch(function (error) {
+        // this.loading = false
+        console.log(error)
+      })
+    }
   }
 }
 </script>

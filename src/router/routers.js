@@ -23,60 +23,52 @@ export default [
   },
   {
     path: '/',
-    name: '_home',
-    redirect: '/',
+    name: 'home',
+    redirect: '/overview',
     component: Main,
     meta: {
       hideInMenu: true,
-      notCache: true
+      notCache: true,
+      title: '对象存储',
+      showInBreadCrumb: true
     },
     children: [
       {
-        path: '/',
+        path: '/overview',
         name: '/',
         meta: {
           hideInMenu: true,
-          title: '首页',
-          notCache: true
+          title: '概览',
+          notCache: true,
+          showInBreadCrumb: true
         },
-        component: () => import('@/view/single-page/home')
-      }
-    ]
-  },
-  {
-    path: '/device',
-    name: '设备管理',
-    meta: {
-    },
-    component: Main,
-    children: [
+        component: () => import('@/view/overview')
+      },
       {
-        path: 'list',
-        name: '设备列表',
+        path: '/bucket/:dc/:bucket/overview',
+        name: 'bucket_overview',
         meta: {
-          icon: 'fa-volume-up',
-          title: '设备列表'
+          hideInMenu: true,
+          title: '概览',
+          notCache: true,
+          showInBreadCrumb: true
         },
-        component: () => import('@/view/device-list.vue')
-      }
-    ]
-  },
-  {
-    path: '/audio',
-    name: '音频管理',
-    component: Main,
-    children: [
+        component: () => import('@/view/bucket_overview')
+      },
       {
-        path: 'list',
-        name: 'audio_list',
+        path: '/bucket/:dc/:bucket/object',
+        name: 'bucket_object',
         meta: {
-          icon: 'fa-file-audio-o',
-          title: '音频列表'
+          hideInMenu: true,
+          title: '文件管理',
+          notCache: true,
+          showInBreadCrumb: true
         },
-        component: () => import('@/view/audio-list.vue')
+        component: () => import('@/view/bucket_object')
       }
     ]
   },
+
   {
     path: '/401',
     name: 'error_401',

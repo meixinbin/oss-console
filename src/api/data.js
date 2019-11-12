@@ -1,5 +1,4 @@
 import axios from '@/libs/api.request'
-import store from '@/store'
 
 export const getTableData = () => {
   return axios.request({
@@ -8,43 +7,34 @@ export const getTableData = () => {
   })
 }
 
-export const getDragList = () => {
+export const getBucketList = () => {
   return axios.request({
-    url: 'get_drag_list',
+    url: 'bucket/list',
     method: 'get'
   })
 }
 
-export const getDeviceList = (groupId) => {
+export const listObjects = (bucket, prefix, marker) => {
   return axios.request({
-    url: 'http://localhost:10009/device/rest/list/' + groupId,
-    method: 'get'
-  })
-}
-export const getAudioList = (prefix, marker) => {
-  return axios.request({
-    url: 'http://localhost:10009/ajax/bucket/file/list_objects?bucket=ibs&maxKeys=15',
+    url: 'ajax/bucket/file/list_objects?maxKeys=15',
     method: 'get',
     params: {
+      bucket: bucket,
       prefix: prefix,
       marker: marker
-    }/*,
-    headers:{
-      'Authorization': 'Bearer' + store.state.user.access_token
-    } */
-
+    }
   })
 }
 export const getDeviceGroupTree = (userId) => {
   return axios.request({
-    url: 'http://localhost:10009/device/group/rest/tree/' + userId,
+    url: 'device/group/rest/tree/' + userId,
     method: 'get'
   })
 }
 
 export const generateUploadData = () => {
   return axios.request({
-    url: 'http://localhost:10009/object/ajax/generate_upload_data',
+    url: 'object/ajax/generate_upload_data',
     method: 'get'/*,
     headers:{
       'Authorization': 'Bearer' + store.state.user.access_token
@@ -54,7 +44,7 @@ export const generateUploadData = () => {
 
 export const deleteObj = (bucket, keys) => {
   return axios.request({
-    url: 'http://localhost:10009/ajax/object/delete',
+    url: 'ajax/object/delete',
     method: 'delete',
     params: {
       bucket: bucket,
@@ -64,7 +54,7 @@ export const deleteObj = (bucket, keys) => {
 }
 export const deleteDir = (bucket, prefix) => {
   return axios.request({
-    url: 'http://localhost:10009/ajax/object/delete',
+    url: 'ajax/object/delete',
     method: 'delete',
     params: {
       bucket: bucket,
@@ -74,7 +64,7 @@ export const deleteDir = (bucket, prefix) => {
 }
 export const download = (bucket, keys) => {
   return axios.request({
-    url: 'http://localhost:10009/download',
+    url: 'download',
     method: 'get',
     params: {
       bucket: bucket,
@@ -86,7 +76,7 @@ export const download = (bucket, keys) => {
 
 export const createDir = (bucket, dir) => {
   return axios.request({
-    url: 'http://localhost:10009/create_dir',
+    url: 'create_dir',
     method: 'post',
     data: {
       bucket: bucket,

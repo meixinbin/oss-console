@@ -12,7 +12,7 @@ export default {
   },
   mutations: {
     setBreadCrumb (state, routeMetched) {
-      state.breadCrumbList = getBreadCrumbList(routeMetched, state.homeRoute)
+      state.breadCrumbList = getBreadCrumbList(routeMetched)
     },
     setTagNavList (state, list) {
       if (list) {

@@ -53,21 +53,23 @@ export const getMenuByRouter = (list, access) => {
  * @param {Array} routeMetched 当前路由metched
  * @returns {Array}
  */
-export const getBreadCrumbList = (routeMetched, homeRoute) => {
-  let res = routeMetched.filter(item => {
-    return item.meta === undefined || !item.meta.hide
+export const getBreadCrumbList = (route) => {
+  sessionStorage.setItem(route.name, route.path)
+  let res = route.matched.filter(item => {
+    return item.meta === undefined || !item.meta.hide || !item.meta.showInBreadCrumb
   }).map(item => {
     let obj = {
       icon: (item.meta && item.meta.icon) || '',
       name: item.name,
-      meta: item.meta
+      meta: item.meta,
+      to: sessionStorage.getItem(item.name) ? sessionStorage.getItem(item.name) : item.path
     }
     return obj
   })
   res = res.filter(item => {
-    return !item.meta.hideInMenu
+    return item.meta.showInBreadCrumb
   })
-  return [Object.assign(homeRoute, { to: homeRoute.path }), ...res]
+  return res
 }
 
 export const showTitle = (item, vm) => vm.$config.useI18n ? vm.$t(item.name) : ((item.meta && item.meta.title) || item.name)
@@ -319,13 +321,13 @@ export const delParam = (paramKey) => {
   var beforeUrl = url.substr(0, url.indexOf('?')) // 页面主地址（参数之前地址）
   var nextUrl = ''
 
-  var arr = new Array()
-  if (urlParam != '') {
+  var arr = []
+  if (urlParam !== '') {
     var urlParamArr = urlParam.split('&') // 将参数按照&符分成数组
     for (var i = 0; i < urlParamArr.length; i++) {
       var paramArr = urlParamArr[i].split('=') // 将参数键，值拆开
       // 如果键雨要删除的不一致，则加入到参数中
-      if (paramArr[0] != paramKey) {
+      if (paramArr[0] !== paramKey) {
         arr.push(urlParamArr[i])
       }
     }
